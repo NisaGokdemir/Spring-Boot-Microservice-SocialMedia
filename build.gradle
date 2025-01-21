@@ -1,0 +1,86 @@
+// Eklentiler (Plugins) Bölümü
+plugins {
+    // Java eklentisini ekliyoruz. Bu, Java projeleri oluşturmak için gerekli temel eklentidir.
+    id 'java'
+    // Uygulama eklentisini ekliyoruz. Bu, uygulama çalıştırma ve paketleme görevlerini sağlar.
+    id 'application'
+    // Spring Boot eklentisini belirli bir versiyonla ekliyoruz. Bu, Spring Boot uygulamaları oluşturmak için gerekli eklentidir.
+    id 'org.springframework.boot' version '3.4.1'
+    // Spring Dependency Management eklentisini ekliyoruz. Bu, bağımlılık yönetimini kolaylaştırır.
+    id 'io.spring.dependency-management' version '1.1.7'
+}
+
+// Tüm Projeler İçin Ortak Yapılandırmalar (All Projects Configuration)
+allprojects {
+    // Tüm projelerde kullanılacak eklentileri ve yapılandırmaları belirliyoruz
+    // Java eklentisini uyguluyoruz
+    apply plugin: 'java'
+    // Uygulama eklentisini uyguluyoruz
+    apply plugin: 'application'
+    // Spring Boot eklentisini uyguluyoruz
+    apply plugin: 'org.springframework.boot'
+    // Spring Dependency Management eklentisini uyguluyoruz
+    apply plugin: 'io.spring.dependency-management'
+    // Java Library eklentisini uyguluyoruz. Bu, kütüphane projeleri oluşturmak için kullanılır.
+    apply plugin: 'java-library'
+    // dependencies.gradle dosyasını uyguluyoruz. Bu, bağımlılıkları merkezi bir yerden yönetmemizi sağlar.
+    apply from: "${rootDir}/dependencies.gradle"
+}
+
+// Alt Projeler İçin Yapılandırmalar (Subprojects Configuration)
+subprojects {
+    // Alt projeler için grup ve versiyon bilgilerini belirliyoruz
+    group = 'org.example'
+    version = 'v.0.1'
+    // Java versiyon uyumluluğunu belirliyoruz
+    java {
+        sourceCompatibility = JavaVersion.VERSION_21
+        targetCompatibility = JavaVersion.VERSION_21
+    }
+    // Tüm Java derleme görevleri için karakter kodlamasını UTF-8 olarak ayarlıyoruz
+    tasks.withType(JavaCompile).configureEach {
+        options.encoding = 'UTF-8'
+    }
+}
+
+// Tüm Projeler İçin Repository ve Bağımlılıklar (Repositories and Dependencies for All Projects)
+allprojects {
+    // Tüm projeler için kullanılacak repository'leri belirliyoruz
+    // Repository'ler, projede kullanılan bağımlılıkların indirileceği yerlerdir.
+    // Maven Central, en yaygın kullanılan Java kütüphanelerinin bulunduğu merkezi bir repository'dir.
+    // Google repository'si, Google tarafından sağlanan kütüphaneleri içerir.
+    repositories {
+        mavenCentral()
+        google()
+    }
+    // Build script için repository'leri ve bağımlılıkları belirliyoruz
+    // Buildscript bloğu, Gradle build dosyasının kendisi için gerekli olan bağımlılıkları tanımlar.
+    // Bu bağımlılıklar, build işlemi sırasında kullanılacak olan eklentileri içerir.
+    buildscript {
+        repositories {
+            mavenCentral() // Bağımlılıkların indirileceği repository
+        }
+        dependencies {
+            // Spring Boot Gradle Plugin bağımlılığını ekliyoruz
+            // Bu bağımlılık, Spring Boot uygulamalarını oluşturmak ve yönetmek için gerekli olan Gradle eklentisini sağlar.
+            classpath("org.springframework.boot:spring-boot-gradle-plugin:${versions.springBoot}")
+        }
+    }
+    dependencies {
+        // apply from: "${rootDir}/dependencies.gradle" sayesinde libs. görebilmektedir.
+        implementation libs.springBootStarterWeb
+        implementation libs.swaggerui
+    }
+    // Test görevleri için JUnit platformunu kullanıyoruz
+    test {
+        useJUnitPlatform()
+    }
+}
+
+// Derleme Konfigürasyonları (Configurations)
+configurations {
+    // Sadece derleme zamanında kullanılacak bağımlılıkları belirliyoruz
+    compileOnly {
+        extendsFrom annotationProcessor
+    }
+}
