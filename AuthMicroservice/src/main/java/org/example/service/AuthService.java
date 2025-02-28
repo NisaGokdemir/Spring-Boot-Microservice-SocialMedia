@@ -24,7 +24,7 @@ public class AuthService {
         userProfileManager.createUser(CreateUserRequestDto.builder()
                 .authId(auth.getId())
                 .email(auth.getEmail())
-                .username(auth.getUserName())
+                .userName(auth.getUserName())
                 .build());
         return auth;
     }
